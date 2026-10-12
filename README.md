@@ -23,6 +23,13 @@ XNotify removes all three.
 - ✅ **No duplicates:** Apps that are also installed on the tablet are skipped.
 - Languages: English, Türkçe, Русский, Español, 简体中文
 
+## Screenshots
+| Receive tab on the tablet | Every phone app, with icons |
+|---|---|
+| <img src="https://raw.githubusercontent.com/Leekin2/XNotify/main/screenshots/receive.png" width="420"> | <img src="https://raw.githubusercontent.com/Leekin2/XNotify/main/screenshots/picker.png" width="420"> |
+
+The tablet's system language is Turkish, so the lines XNotify adds are in Turkish; Xiaomi's own screen has no Turkish translation and stays in English.
+
 ## Requirements
 - A Xiaomi phone and a Xiaomi tablet on the HyperOS 4 China ROM (Android 17)
 - Both signed in to the same Xiaomi account, with Wi-Fi and Bluetooth on
@@ -67,6 +74,11 @@ XNotify bu üç sınırı da kaldırır.
 - ✅ **Her bölgedeki Xiaomi hesabı:** AB, ABD, Ukrayna gibi Çin dışı hesaplar da Çin ROM'unda çalışır.
 - ✅ **Çift bildirim yok:** Tablette de kurulu olan uygulamaların bildirimleri tekrar gösterilmez.
 - Diller: English, Türkçe, Русский, Español, 简体中文
+
+### Ekran görüntüleri
+| Tablette Al sekmesi | Telefondaki tüm uygulamalar, ikonlarıyla |
+|---|---|
+| <img src="https://raw.githubusercontent.com/Leekin2/XNotify/main/screenshots/receive.png" width="420"> | <img src="https://raw.githubusercontent.com/Leekin2/XNotify/main/screenshots/picker.png" width="420"> |
 
 ### Gereksinimler
 - HyperOS 4 Çin ROM'lu (Android 17) bir Xiaomi telefon ve bir Xiaomi tablet
