@@ -1,30 +1,42 @@
-# XNotify 3.3
+# XNotify
 
-**An LSPosed module that shows your Xiaomi phone's notifications on your Xiaomi tablet, for every app, on the HyperOS 4 China ROM.**
+**See your Xiaomi phone's notifications on your Xiaomi tablet, from every app.**
+An LSPosed module for the HyperOS 4 China ROM.
 
-[Türkçe aşağıda](#türkçe)
+[Türkçe açıklama aşağıda](#türkçe)
+
+## Why
+HyperOS can show phone notifications on a tablet, but it has three limits:
+- Only a few Chinese apps are supported (WeChat, QQ, DingTalk…).
+- The China tablet ROM hides the **Receive** tab, where you choose which phone and which apps to receive notifications from.
+- It only works with Xiaomi accounts registered in China.
+
+XNotify removes all three.
 
 ## Features
-- ✅ **Every app:** HyperOS only syncs a handful of Chinese apps (WeChat, QQ…). XNotify lets the tablet pick any app installed on the phone, including Telegram, WhatsApp, Instagram, SMS and calls.
-- ✅ **Receive screen on the tablet:** The CN tablet ROM hides it; XNotify opens it from Settings → Interconnectivity → Notifications.
-- ✅ **App picker with icons:** The phone sends its app list and icons to the tablet. Use "Refresh from phone" after installing new apps.
-- ✅ **Clear notifications:** Big app icon, with the source device and app name in the title.
-- ✅ **Works while the phone is in use**, not only when it is locked.
-- ✅ **Non-China Xiaomi accounts** (EU, US, UA…) on CN ROMs are supported.
-- ✅ **No duplicates:** Apps installed on the tablet too are skipped.
-- UI languages: English, Türkçe, Русский, Español, 简体中文
+- ✅ **Every app:** Telegram, WhatsApp, Instagram, SMS, calls and anything else installed on the phone.
+- ✅ **Receive tab unlocked:** Settings → Interconnectivity → Notifications now shows the **Receive** tab on the tablet.
+- ✅ **App picker with icons:** The phone sends its app list and icons to the tablet. After installing new apps, tap **Refresh from phone**.
+- ✅ **Clear notifications:** Big app icon; the title shows the source device and the app name.
+- ✅ **Works while you use the phone**, not only when it is locked.
+- ✅ **Any Xiaomi account region:** EU, US, UA and other non-China accounts work on China ROMs.
+- ✅ **No duplicates:** Apps that are also installed on the tablet are skipped.
+- Languages: English, Türkçe, Русский, Español, 简体中文
 
 ## Requirements
-- Xiaomi phone and tablet on the HyperOS 4 China ROM (Android 17), signed in to the same Xiaomi account, Wi-Fi and Bluetooth on
-- Root (KernelSU / SukiSU / Magisk) and LSPosed (API 102) on **both** devices
-- Tested on Xiaomi 15 Ultra + Xiaomi Pad 8 Pro, and REDMI K90 Pro Max + Pad
+- A Xiaomi phone and a Xiaomi tablet on the HyperOS 4 China ROM (Android 17)
+- Both signed in to the same Xiaomi account, with Wi-Fi and Bluetooth on
+- Root (KernelSU, SukiSU or Magisk) and LSPosed (API 102) on **both** devices
+
+Tested on Xiaomi 15 Ultra + Xiaomi Pad 8 Pro, and REDMI K90 Pro Max + Xiaomi Pad.
 
 ## Install
-1. Install XNotify on **both** the phone and the tablet and enable it in LSPosed (scope: `com.milink.service`, Interconnectivity).
-2. Reboot both devices, or force-stop `com.milink.service`.
-3. On the tablet: Settings → Interconnectivity → Notifications → Receive → your phone, then turn on the apps you want.
+1. Install XNotify on **both** the phone and the tablet.
+2. Enable it in LSPosed. The scope is `com.milink.service` (Interconnectivity).
+3. Reboot both devices.
+4. On the tablet, open **Settings → Interconnectivity → Notifications → Receive**, tap your phone and turn on the apps you want.
 
-XNotify has no app icon or settings screen; the tablet's own notification screen controls everything.
+XNotify has no app icon or settings screen of its own. Everything is controlled from the tablet's notification settings.
 
 ## Source code and support
 - Source: https://github.com/Leekin2/XNotify (GPL-3.0)
@@ -35,24 +47,43 @@ XNotify has no app icon or settings screen; the tablet's own notification screen
 
 ## Türkçe
 
-**Xiaomi telefonunuzdaki bildirimleri, her uygulama için Xiaomi tabletinizde gösteren LSPosed modülü (HyperOS 4 Çin ROM).**
+**Xiaomi telefonunuzdaki tüm uygulamaların bildirimlerini Xiaomi tabletinizde görün.**
+HyperOS 4 Çin ROM'u için bir LSPosed modülü.
+
+### Neden
+HyperOS telefon bildirimlerini tablette gösterebiliyor, ama üç sınırı var:
+- Yalnızca birkaç Çin uygulaması destekleniyor (WeChat, QQ, DingTalk…).
+- Çin tablet ROM'u **Al (Receive)** sekmesini gizliyor. Hangi telefondan ve hangi uygulamalardan bildirim alacağınızı bu sekmede seçiyorsunuz.
+- Sadece Çin'de kayıtlı Xiaomi hesaplarıyla çalışıyor.
+
+XNotify bu üç sınırı da kaldırır.
 
 ### Özellikler
-- ✅ **Tüm uygulamalar:** HyperOS sadece birkaç Çin uygulamasını (WeChat, QQ…) aktarır. XNotify ile tablet, telefondaki her uygulamayı seçebilir: Telegram, WhatsApp, Instagram, SMS ve aramalar dahil.
-- ✅ **Tablette Alma ekranı:** Çin tablet ROM'u bunu gizler; XNotify Ayarlar → Bağlantı → Bildirimler'den açar.
-- ✅ **İkonlu uygulama seçici:** Telefon, uygulama listesini ve ikonlarını tablete gönderir. Yeni uygulama kurunca "Telefondan yenile"ye dokunun.
-- ✅ **Net bildirimler:** Büyük uygulama ikonu, başlıkta kaynak cihaz ve uygulama adı.
-- ✅ **Telefon kullanılırken de çalışır**, sadece kilitliyken değil.
-- ✅ **Çin dışı Xiaomi hesapları** (AB, ABD, UA…) Çin ROM'unda desteklenir.
-- ✅ **Çift bildirim yok:** Tablette de kurulu olan uygulamalar atlanır.
+- ✅ **Tüm uygulamalar:** Telegram, WhatsApp, Instagram, SMS, aramalar ve telefonda kurulu diğer her şey.
+- ✅ **Al sekmesi açılır:** Tablette Ayarlar → Bağlantı → Bildirimler bölümünde artık **Al** sekmesi görünür.
+- ✅ **İkonlu uygulama seçici:** Telefon, uygulama listesini ve ikonlarını tablete gönderir. Telefona yeni uygulama kurduktan sonra **Telefondan yenile**'ye dokunun.
+- ✅ **Anlaşılır bildirimler:** Büyük uygulama ikonu; başlıkta bildirimin geldiği cihaz ve uygulama adı yazar.
+- ✅ **Telefonu kullanırken de çalışır**, sadece kilitliyken değil.
+- ✅ **Her bölgedeki Xiaomi hesabı:** AB, ABD, Ukrayna gibi Çin dışı hesaplar da Çin ROM'unda çalışır.
+- ✅ **Çift bildirim yok:** Tablette de kurulu olan uygulamaların bildirimleri tekrar gösterilmez.
+- Diller: English, Türkçe, Русский, Español, 简体中文
 
 ### Gereksinimler
-- Aynı Xiaomi hesabına giriş yapılmış, HyperOS 4 Çin ROM'lu (Android 17) Xiaomi telefon ve tablet; Wi-Fi ve Bluetooth açık
-- **İki cihazda da** root (KernelSU / SukiSU / Magisk) ve LSPosed (API 102)
+- HyperOS 4 Çin ROM'lu (Android 17) bir Xiaomi telefon ve bir Xiaomi tablet
+- İkisi de aynı Xiaomi hesabına giriş yapmış, Wi-Fi ve Bluetooth açık
+- **İki cihazda da** root (KernelSU, SukiSU veya Magisk) ve LSPosed (API 102)
+
+Xiaomi 15 Ultra + Xiaomi Pad 8 Pro ve REDMI K90 Pro Max + Xiaomi Pad üzerinde test edildi.
 
 ### Kurulum
-1. XNotify'ı telefona **ve** tablete kurun, LSPosed'da etkinleştirin (kapsam: `com.milink.service`).
-2. İki cihazı yeniden başlatın.
-3. Tablette: Ayarlar → Bağlantı → Bildirimler → Al → telefonunuz, istediğiniz uygulamaları açın.
+1. XNotify'ı telefona **ve** tablete kurun.
+2. LSPosed'da etkinleştirin. Kapsam: `com.milink.service` (Bağlantı / Interconnectivity).
+3. İki cihazı da yeniden başlatın.
+4. Tablette **Ayarlar → Bağlantı → Bildirimler → Al** bölümünü açın, telefonunuza dokunun ve istediğiniz uygulamaları açın.
 
-Destek: Telegram kanalı https://t.me/xioamifetiscisi · Öneri ve geri bildirim [@emcleek](https://t.me/emcleek)
+XNotify'ın kendi ikonu veya ayar ekranı yoktur. Her şey tabletin bildirim ayarlarından yönetilir.
+
+### Kaynak kod ve destek
+- Kaynak kod: https://github.com/Leekin2/XNotify (GPL-3.0)
+- Telegram kanalı: https://t.me/xioamifetiscisi
+- Öneri ve geri bildirim: [@emcleek](https://t.me/emcleek)
