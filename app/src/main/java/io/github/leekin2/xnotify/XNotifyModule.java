@@ -812,19 +812,29 @@ public final class XNotifyModule extends XposedModule {
     }
 
     /**
-     * A refresh icon at the top right of the app picker: asks the phone (Xiaomi's own subscription
-     * query, which XNotify on the phone answers with its app list and icons), then reopens the
-     * screen with the new list. The list size and age go under the title.
+     * Top right of the app picker: "turn all off" and refresh (asks the phone through Xiaomi's own
+     * subscription query, which XNotify on the phone answers with its app list and icons, then
+     * reopens the screen). The list size and age go under the title, and a search box above the
+     * list filters the apps by name.
      */
     private void addRefreshIcon(android.app.Activity activity, Object fragment, String info) {
         try {
             android.view.View bar = find(activity.getWindow().getDecorView(), "miuix.appcompat.internal.app.widget.ActionBarView");
             if (bar == null) { info("Refresh icon skipped: no action bar"); return; }
             Texts texts = Texts.of(activity);
+            float dp = activity.getResources().getDisplayMetrics().density;
+            int pad = Math.round(8 * dp);
+            int color = textColor(activity);
+
+            android.widget.ImageView off = new android.widget.ImageView(activity);
+            off.setImageDrawable(allOffGlyph(activity, color));
+            off.setContentDescription(texts.allOff);
+            off.setPadding(pad, pad, pad, pad);
+            off.setOnClickListener(v -> confirmAllOff(activity, fragment, texts));
+
             android.widget.ImageView icon = new android.widget.ImageView(activity);
             icon.setImageDrawable(refreshGlyph(activity));
             icon.setContentDescription(texts.refresh);
-            int pad = Math.round(8 * activity.getResources().getDisplayMetrics().density);
             icon.setPadding(pad, pad, pad, pad);
             icon.setOnClickListener(v -> {
                 try {
@@ -837,11 +847,197 @@ public final class XNotifyModule extends XposedModule {
                     error("Refresh failed", t);
                 }
             });
-            bar.getClass().getMethod("setEndView", android.view.View.class).invoke(bar, icon);
+
+            android.widget.LinearLayout actions = new android.widget.LinearLayout(activity);
+            actions.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            actions.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            actions.addView(off);
+            actions.addView(icon);
+            bar.getClass().getMethod("setEndView", android.view.View.class).invoke(bar, actions);
             bar.getClass().getMethod("setSubtitle", CharSequence.class).invoke(bar, info);
+            addSearch(activity, fragment, texts, color);
         } catch (Throwable t) {
             error("Refresh icon unavailable", t);
         }
+    }
+
+    /** The picker's app rows (Xiaomi's and XNotify's) with their package names. */
+    private static java.util.Map<Object, String> appRows(Object fragment) throws Exception {
+        java.util.Map<Object, String> rows = new java.util.LinkedHashMap<>();
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, String> wired = (java.util.Map<String, String>) field(fragment, "mSubscriptionCheckBoxMap");
+        if (wired == null) return rows;
+        for (java.util.Map.Entry<String, String> e : wired.entrySet()) {
+            Object row = invoke(fragment, "findPreference", e.getKey());
+            if (row != null) rows.put(row, e.getValue());
+        }
+        return rows;
+    }
+
+    /** A search box above the list; typing hides the apps whose name does not match. */
+    private void addSearch(android.app.Activity activity, Object fragment, Texts texts, int color) throws Exception {
+        android.view.View list = activity.findViewById(android.R.id.list_container);
+        if (list == null || !(list.getParent() instanceof android.widget.FrameLayout holder)) { info("Search skipped: no list"); return; }
+        android.view.View recycler = find(list, "androidx.recyclerview.widget.RecyclerView");
+        if (recycler == null) { info("Search skipped: no recycler"); return; }
+        float dp = activity.getResources().getDisplayMetrics().density;
+        // Line the box up with the list's rounded card.
+        int side = Math.round(16 * dp);
+        if (recycler instanceof android.view.ViewGroup g)
+            for (int i = 0; i < g.getChildCount(); i++)
+                if (g.getChildAt(i).getClass().getName().contains("HyperCellLayout")) { side = g.getChildAt(i).getLeft(); break; }
+
+        android.widget.EditText box = new android.widget.EditText(activity);
+        box.setHint(texts.search);
+        box.setSingleLine(true);
+        box.setTextColor(color);
+        box.setHintTextColor((color & 0x00FFFFFF) | 0x80000000);
+        box.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16);
+        box.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH);
+        box.setPadding(Math.round(16 * dp), 0, Math.round(16 * dp), 0);
+        android.graphics.drawable.GradientDrawable shape = new android.graphics.drawable.GradientDrawable();
+        shape.setColor((color & 0x00FFFFFF) | 0x14000000);
+        shape.setCornerRadius(24 * dp);
+        box.setBackground(shape);
+        android.graphics.drawable.Drawable glass = searchGlyph(activity, (color & 0x00FFFFFF) | 0x99000000);
+        box.setCompoundDrawablesRelativeWithIntrinsicBounds(glass, null, null, null);
+        box.setCompoundDrawablePadding(Math.round(10 * dp));
+
+        android.widget.FrameLayout strip = new android.widget.FrameLayout(activity);
+        strip.setBackgroundColor(windowColor(activity));
+        int height = Math.round(48 * dp), gap = Math.round(8 * dp);
+        android.widget.FrameLayout.LayoutParams boxParams = new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, height);
+        boxParams.setMargins(side, gap, side, gap);
+        strip.addView(box, boxParams);
+        android.widget.FrameLayout.LayoutParams stripParams = new android.widget.FrameLayout.LayoutParams(
+                android.view.ViewGroup.LayoutParams.MATCH_PARENT, height + 2 * gap);
+        holder.addView(strip, stripParams);
+        // Xiaomi pads and shifts the list below the title bar without a layout event, so check
+        // before each frame (cheap, and it never skips one): keep the strip where the first row
+        // starts and the rows below the strip. The overscroll bounce is left out, so the strip
+        // stays still while scrolling.
+        int extra = height + 2 * gap;
+        int[] applied = {-1}, base = {0};
+        recycler.getViewTreeObserver().addOnPreDrawListener(() -> {
+            int current = recycler.getPaddingTop();
+            if (current != applied[0]) {
+                boolean atTop = !recycler.canScrollVertically(-1);
+                base[0] = current;
+                applied[0] = current + extra;
+                recycler.setPadding(recycler.getPaddingLeft(), applied[0], recycler.getPaddingRight(), recycler.getPaddingBottom());
+                // The list keeps its scroll position when padded; show the first row again.
+                if (atTop) recycler.post(() -> recycler.scrollBy(0, -100_000));
+            }
+            int[] at = new int[2], from = new int[2];
+            holder.getLocationOnScreen(from);
+            recycler.getLocationOnScreen(at);
+            int bounce = Math.round(list.getTranslationY() + recycler.getTranslationY()) - list.getScrollY();
+            int top = at[1] - bounce + base[0] - from[1];
+            if (stripParams.topMargin != top) { stripParams.topMargin = top; strip.setLayoutParams(stripParams); }
+            return true;
+        });
+
+        box.addTextChangedListener(new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence q, int st, int c, int af) { }
+            @Override public void onTextChanged(CharSequence q, int st, int b, int c) { }
+            @Override public void afterTextChanged(android.text.Editable q) {
+                String query = q.toString().trim().toLowerCase(java.util.Locale.ROOT);
+                try {
+                    for (Object row : appRows(fragment).keySet()) {
+                        Object title = invoke(row, "getTitle");
+                        boolean match = query.isEmpty() || (title != null && title.toString().toLowerCase(java.util.Locale.ROOT).contains(query));
+                        invoke(row, "setVisible", match);
+                    }
+                } catch (Throwable t) {
+                    error("Search failed", t);
+                }
+            }
+        });
+    }
+
+    /** Asks first, then unsubscribes every app that is on, through Xiaomi's own switch handling. */
+    private void confirmAllOff(android.app.Activity activity, Object fragment, Texts texts) {
+        try {
+            java.util.List<Object[]> on = new java.util.ArrayList<>();
+            for (java.util.Map.Entry<Object, String> row : appRows(fragment).entrySet())
+                if (Boolean.TRUE.equals(invoke(row.getKey(), "isChecked"))) on.add(new Object[]{row.getKey(), row.getValue()});
+            if (on.isEmpty()) {
+                android.widget.Toast.makeText(activity, texts.noneOn, android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Method unsubscribe = null;
+            for (Method m : fragment.getClass().getDeclaredMethods())
+                if (m.getName().equals("handleUnSubscribe") && m.getParameterCount() == 2) unsubscribe = m;
+            if (unsubscribe == null) throw new NoSuchMethodException("handleUnSubscribe");
+            unsubscribe.setAccessible(true);
+            Method run = unsubscribe;
+            boolean night = (activity.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                    == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+            new android.app.AlertDialog.Builder(activity, night
+                    ? android.R.style.Theme_DeviceDefault_Dialog_Alert : android.R.style.Theme_DeviceDefault_Light_Dialog_Alert)
+                    .setTitle(texts.allOffTitle)
+                    .setMessage(String.format(texts.allOffMessage, on.size()))
+                    .setNegativeButton(texts.cancel, null)
+                    .setPositiveButton(texts.allOff, (d, w) -> {
+                        for (Object[] row : on) {
+                            try { run.invoke(fragment, row[0], row[1]); } catch (Throwable t) { error("Turn off failed for " + row[1], t); }
+                        }
+                        info("Turned off " + on.size() + " apps");
+                    })
+                    .show();
+        } catch (Throwable t) {
+            error("Turn all off unavailable", t);
+        }
+    }
+
+    /** The screen's own background, so the search strip blends in (dark or light theme). */
+    private static int windowColor(android.app.Activity activity) {
+        android.graphics.drawable.Drawable bg = activity.getWindow().getDecorView().getBackground();
+        if (bg instanceof android.graphics.drawable.ColorDrawable cd) return cd.getColor() | 0xFF000000;
+        boolean night = (activity.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        return night ? 0xFF000000 : 0xFFFFFFFF;
+    }
+
+    private static int textColor(Context context) {
+        android.content.res.TypedArray a = context.obtainStyledAttributes(new int[]{android.R.attr.textColorPrimary});
+        int color = a.getColor(0, 0xFF000000);
+        a.recycle();
+        return color;
+    }
+
+    /** A switch in the off position: "turn all off". */
+    private static android.graphics.drawable.Drawable allOffGlyph(Context context, int color) {
+        int px = Math.round(26 * context.getResources().getDisplayMetrics().density);
+        android.graphics.Bitmap b = android.graphics.Bitmap.createBitmap(px, px, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas c = new android.graphics.Canvas(b);
+        android.graphics.Paint stroke = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        stroke.setColor(color);
+        stroke.setStyle(android.graphics.Paint.Style.STROKE);
+        stroke.setStrokeWidth(px * 0.08f);
+        float top = px * 0.3f, bottom = px * 0.7f, r = (bottom - top) / 2;
+        c.drawRoundRect(px * 0.08f, top, px * 0.92f, bottom, r, r, stroke);
+        android.graphics.Paint fill = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        fill.setColor(color);
+        c.drawCircle(px * 0.08f + r, px * 0.5f, r * 0.55f, fill);
+        b.setDensity(context.getResources().getDisplayMetrics().densityDpi);
+        return new android.graphics.drawable.BitmapDrawable(context.getResources(), b);
+    }
+
+    private static android.graphics.drawable.Drawable searchGlyph(Context context, int color) {
+        int px = Math.round(20 * context.getResources().getDisplayMetrics().density);
+        android.graphics.Bitmap b = android.graphics.Bitmap.createBitmap(px, px, android.graphics.Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas c = new android.graphics.Canvas(b);
+        android.graphics.Paint stroke = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        stroke.setColor(color);
+        stroke.setStyle(android.graphics.Paint.Style.STROKE);
+        stroke.setStrokeWidth(px * 0.1f);
+        stroke.setStrokeCap(android.graphics.Paint.Cap.ROUND);
+        c.drawCircle(px * 0.42f, px * 0.42f, px * 0.28f, stroke);
+        c.drawLine(px * 0.63f, px * 0.63f, px * 0.88f, px * 0.88f, stroke);
+        b.setDensity(context.getResources().getDisplayMetrics().densityDpi);
+        return new android.graphics.drawable.BitmapDrawable(context.getResources(), b);
     }
 
     private static android.view.View find(android.view.View view, String className) {
