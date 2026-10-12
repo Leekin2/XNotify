@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">XNotify</string>
+    <string name="module_description">HyperOS: shows phone notifications on your Xiaomi tablet, for every app. Enable on both devices; pick the apps on the tablet under Settings → Interconnectivity → Notifications → your phone.</string>
+</resources>

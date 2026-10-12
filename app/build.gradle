@@ -1,0 +1,22 @@
+plugins {
+    id 'com.android.application'
+}
+android {
+    namespace 'io.github.leekin2.xnotify'
+    compileSdk { version = release(37) }
+    buildToolsVersion '36.0.0'
+    defaultConfig {
+        applicationId 'io.github.leekin2.xnotify'
+        minSdk 35
+        targetSdk 36
+        versionCode 24
+        versionName '3.3'
+    }
+    buildTypes {
+        release { signingConfig signingConfigs.debug; minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies {
+    compileOnly 'io.github.libxposed:api:102.0.0'
+}
