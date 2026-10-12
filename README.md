@@ -18,6 +18,7 @@ XNotify removes all three.
 - ✅ **Receive tab unlocked:** Settings → Interconnectivity → Notifications now shows the **Receive** tab on the tablet.
 - ✅ **App picker with icons:** The phone sends its app list and icons to the tablet. After installing new apps, tap **Refresh from phone**.
 - ✅ **Clear notifications:** Big app icon; the title shows the source device and the app name.
+- ✅ **Pop-ups:** Notifications pop up on the tablet screen, even while you watch a video.
 - ✅ **Works while you use the phone**, not only when it is locked.
 - ✅ **Any Xiaomi account region:** EU, US, UA and other non-China accounts work on China ROMs.
 - ✅ **No duplicates:** Apps that are also installed on the tablet are skipped.
@@ -39,7 +40,7 @@ Tested on Xiaomi 15 Ultra + Xiaomi Pad 8 Pro, and REDMI K90 Pro Max + Xiaomi Pad
 
 ## Install
 1. Install XNotify on **both** the phone and the tablet.
-2. Enable it in LSPosed. The scope is `com.milink.service` (Interconnectivity).
+2. Enable it in LSPosed. The scope is `com.milink.service` (Interconnectivity) and System UI.
 3. Reboot both devices.
 4. On the tablet, open **Settings → Interconnectivity → Notifications → Receive**, tap your phone and turn on the apps you want.
 
@@ -70,6 +71,7 @@ XNotify bu üç sınırı da kaldırır.
 - ✅ **Al sekmesi açılır:** Tablette Ayarlar → Bağlantı → Bildirimler bölümünde artık **Al** sekmesi görünür.
 - ✅ **İkonlu uygulama seçici:** Telefon, uygulama listesini ve ikonlarını tablete gönderir. Telefona yeni uygulama kurduktan sonra **Telefondan yenile**'ye dokunun.
 - ✅ **Anlaşılır bildirimler:** Büyük uygulama ikonu; başlıkta bildirimin geldiği cihaz ve uygulama adı yazar.
+- ✅ **Ekranda açılır:** Bildirimler tablette ekranın üstünde açılır, video izlerken bile.
 - ✅ **Telefonu kullanırken de çalışır**, sadece kilitliyken değil.
 - ✅ **Her bölgedeki Xiaomi hesabı:** AB, ABD, Ukrayna gibi Çin dışı hesaplar da Çin ROM'unda çalışır.
 - ✅ **Çift bildirim yok:** Tablette de kurulu olan uygulamaların bildirimleri tekrar gösterilmez.
@@ -89,7 +91,7 @@ Xiaomi 15 Ultra + Xiaomi Pad 8 Pro ve REDMI K90 Pro Max + Xiaomi Pad üzerinde t
 
 ### Kurulum
 1. XNotify'ı telefona **ve** tablete kurun.
-2. LSPosed'da etkinleştirin. Kapsam: `com.milink.service` (Bağlantı / Interconnectivity).
+2. LSPosed'da etkinleştirin. Kapsam: `com.milink.service` (Bağlantı / Interconnectivity) ve System UI.
 3. İki cihazı da yeniden başlatın.
 4. Tablette **Ayarlar → Bağlantı → Bildirimler → Al** bölümünü açın, telefonunuza dokunun ve istediğiniz uygulamaları açın.
 

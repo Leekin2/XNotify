@@ -32,6 +32,9 @@ public final class XNotifyModule extends XposedModule {
     private static final String PROCESSOR = PKG + "trans.client.receive.NotificationProcessor";
     private static final String LYRA_DISCOVER = PKG + "discover.LyraDiscover";
     private static final String UI = "com.miui.circulate.world.ui.connectivitysettings.";
+    private static final String SYSTEMUI = "com.android.systemui";
+    /** Channel milink posts forwarded notifications on. */
+    private static final String SYNC_CHANNEL = "ancs_channel";
 
     /** Never forwarded: system chrome and the sync stack itself. */
     private static final Set<String> EXCLUDED = Set.of("android", "com.android.systemui", MILINK,
@@ -56,6 +59,10 @@ public final class XNotifyModule extends XposedModule {
 
     @Override
     public void onPackageReady(XposedModuleInterface.PackageReadyParam param) {
+        if (SYSTEMUI.equals(param.getPackageName())) {
+            try { hookHeadsUp(param.getClassLoader()); } catch (Throwable t) { error("Pop-up hook unavailable", t); }
+            return;
+        }
         if (!MILINK.equals(param.getPackageName())) return;
         ClassLoader loader = param.getClassLoader();
         try { hookSender(loader); } catch (Throwable t) { error("Sender hook unavailable", t); }
@@ -65,6 +72,29 @@ public final class XNotifyModule extends XposedModule {
         try { hookAppPicker(loader); } catch (Throwable t) { error("App picker hook unavailable", t); }
         try { hookCatalogRequest(loader); } catch (Throwable t) { error("App list request hook unavailable", t); }
         if ("com.milink.crossdeviceservice".equals(android.app.Application.getProcessName())) sendCatalogSoon(loader);
+    }
+
+    // --- Tablet pop-ups ------------------------------------------------------------------------
+
+    /**
+     * HyperOS only pops up (heads-up) notifications of apps on its own whitelist unless the user
+     * turns on "Floating notifications" for the channel, which Interconnectivity is not on, so
+     * forwarded notifications silently land in the shade. Let them pop up like the original
+     * app's would, unless the user switched floating off for Interconnectivity or its channel.
+     */
+    private void hookHeadsUp(ClassLoader loader) throws Exception {
+        Method canFloat = Class.forName("com.miui.systemui.notification.NotificationSettingsManager", false, loader)
+                .getDeclaredMethod("canFloat", Context.class, String.class, String.class);
+        hook(canFloat).setExceptionMode(XposedInterface.ExceptionMode.PROTECTIVE).intercept(chain -> {
+            Object allowed = chain.proceed();
+            if (Boolean.TRUE.equals(allowed) || !MILINK.equals(chain.getArg(1)) || !SYNC_CHANNEL.equals(chain.getArg(2))) return allowed;
+            Context context = (Context) chain.getArg(0);
+            android.content.SharedPreferences prefs = context.getSharedPreferences("app_notification", Context.MODE_MULTI_PROCESS);
+            // 1 = switched off by the user, 2 = on; absent = HyperOS default (whitelist).
+            if (prefs.getInt(MILINK, 0) == 1 || prefs.getInt(MILINK + "_" + SYNC_CHANNEL + "_channel_flag", 0) == 1) return allowed;
+            return true;
+        });
+        info("Forwarded notifications pop up on screen");
     }
 
     // --- Tablet settings screen ----------------------------------------------------------------
@@ -242,6 +272,15 @@ public final class XNotifyModule extends XposedModule {
             if (reported.add("lyra:" + started)) info("Device scan " + (String.valueOf(started).equals("true") ? "running" : "not started"));
             return result;
         });
+    }
+
+    /** Starts XNotify's own process so LSPosed can connect it and offer the System UI scope. */
+    private void wakeModule(Context context) {
+        try {
+            context.getContentResolver().call(android.net.Uri.parse("content://io.github.leekin2.xnotify.XposedService"), "wake", null, null);
+        } catch (Throwable t) {
+            info("XNotify app not reachable for the scope check: " + t.getMessage());
+        }
     }
 
     private void logLocalData(ClassLoader loader, Context context) {
@@ -437,6 +476,7 @@ public final class XNotifyModule extends XposedModule {
                 sendCatalogToAll(instance, context);
                 watchPackages(instance, context);
                 logLocalData(loader, context);
+                wakeModule(context);
             } catch (Throwable t) {
                 error("App list not sent at start", t);
             }

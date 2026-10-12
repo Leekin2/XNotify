@@ -9,7 +9,7 @@ android {
         applicationId 'io.github.leekin2.xnotify'
         minSdk 35
         targetSdk 36
-        versionCode 25
+        versionCode 26
         versionName '3.4'
     }
     buildTypes {
@@ -19,4 +19,5 @@ android {
 }
 dependencies {
     compileOnly 'io.github.libxposed:api:102.0.0'
+    implementation 'io.github.libxposed:service:102.0.0'
 }
