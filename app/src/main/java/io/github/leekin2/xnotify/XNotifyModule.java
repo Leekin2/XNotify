@@ -768,10 +768,9 @@ public final class XNotifyModule extends XposedModule {
             // Xiaomi fills this comment row only for tablet-to-tablet sync; for a phone it is an empty gap.
             Object comment = invoke(owner, "findPreference", "pref_key_list_comment");
             if (comment != null && (int) call(device, "getDeviceType") != 2) invoke(comment, "setVisible", false);
-            int rowIconPx = Math.round(40 * context.getResources().getDisplayMetrics().density);
-            Object smsIcon = invoke(sms, "getIcon");
-            if (smsIcon instanceof android.graphics.drawable.Drawable d0 && d0.getIntrinsicWidth() > 0) rowIconPx = d0.getIntrinsicWidth();
-            addRefreshButton(loader, owner, group, context, deviceId, apps.size(), rowIconPx);
+            android.app.Activity activity = (android.app.Activity) invoke(owner, "requireActivity");
+            String info = listInfo(context, deviceId, apps.size());
+            activity.getWindow().getDecorView().post(() -> addRefreshIcon(activity, owner, info));
             if (apps.isEmpty()) {
                 Object hint = Class.forName("androidx.preference.Preference", false, loader).getConstructor(Context.class).newInstance(context);
                 invoke(hint, "setKey", "xnotify_hint");
@@ -802,76 +801,86 @@ public final class XNotifyModule extends XposedModule {
         });
     }
 
-    /**
-     * "Refresh from phone": asks the phone (Xiaomi's own subscription query, which XNotify on the
-     * phone answers with its app list and icons), then reopens the screen with the new list.
-     */
-    private void addRefreshButton(ClassLoader loader, Object fragment, Object group, Context context,
-            String deviceId, int count, int iconPx) throws Exception {
-        Object button = Class.forName("androidx.preference.Preference", false, loader).getConstructor(Context.class).newInstance(context);
-        invoke(button, "setKey", "xnotify_refresh");
+    /** "174 apps · last updated …", shown under the screen title. */
+    private static String listInfo(Context context, String deviceId, int count) {
         Texts texts = Texts.of(context);
-        invoke(button, "setTitle", texts.refresh);
-        invoke(button, "setIcon", refreshIcon(context, iconPx));
         java.io.File list = new java.io.File(context.getFilesDir(), "xnotify_apps_" + deviceId.replaceAll("[^A-Za-z0-9]", "_"));
         String when = list.isFile()
                 ? java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.MEDIUM, java.text.DateFormat.SHORT, context.getResources().getConfiguration().getLocales().get(0)).format(new java.util.Date(list.lastModified()))
                 : texts.never;
-        invoke(button, "setSummary", texts.summary(count, when));
-        Method setter = null;
-        for (Method m : button.getClass().getMethods())
-            if (m.getName().equals("setOnPreferenceClickListener") && m.getParameterCount() == 1) setter = m;
-        if (setter == null) throw new NoSuchMethodException("setOnPreferenceClickListener");
-        Class<?> listenerType = setter.getParameterTypes()[0];
-        android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
-        Object listener = java.lang.reflect.Proxy.newProxyInstance(listenerType.getClassLoader(), new Class<?>[]{listenerType},
-                (proxy, m, args) -> {
-                    if (m.getDeclaringClass() == Object.class) {
-                        if (m.getName().equals("hashCode")) return System.identityHashCode(proxy);
-                        if (m.getName().equals("equals")) return proxy == args[0];
-                        return "XNotifyRefresh";
-                    }
-                    try {
-                        invoke(button, "setSummary", texts.requesting);
-                        invoke(fragment, "querySubscribeInfo");
-                        main.postDelayed(() -> {
-                            try { ((android.app.Activity) invoke(fragment, "requireActivity")).recreate(); } catch (Throwable ignored) { }
-                        }, 8_000);
-                    } catch (Throwable t) {
-                        error("Refresh failed", t);
-                    }
-                    return m.getReturnType() == boolean.class ? Boolean.TRUE : null;
-                });
-        setter.invoke(button, listener);
-        addToGroup(group, button);
+        return texts.summary(count, when);
     }
 
-    /** A round blue refresh icon, the same size as the app icons in the list. */
-    private static android.graphics.drawable.Drawable refreshIcon(Context context, int px) {
+    /**
+     * A refresh icon at the top right of the app picker: asks the phone (Xiaomi's own subscription
+     * query, which XNotify on the phone answers with its app list and icons), then reopens the
+     * screen with the new list. The list size and age go under the title.
+     */
+    private void addRefreshIcon(android.app.Activity activity, Object fragment, String info) {
+        try {
+            android.view.View bar = find(activity.getWindow().getDecorView(), "miuix.appcompat.internal.app.widget.ActionBarView");
+            if (bar == null) { info("Refresh icon skipped: no action bar"); return; }
+            Texts texts = Texts.of(activity);
+            android.widget.ImageView icon = new android.widget.ImageView(activity);
+            icon.setImageDrawable(refreshGlyph(activity));
+            icon.setContentDescription(texts.refresh);
+            int pad = Math.round(8 * activity.getResources().getDisplayMetrics().density);
+            icon.setPadding(pad, pad, pad, pad);
+            icon.setOnClickListener(v -> {
+                try {
+                    invoke(fragment, "querySubscribeInfo");
+                    bar.getClass().getMethod("setSubtitle", CharSequence.class).invoke(bar, texts.requesting);
+                    v.postDelayed(() -> {
+                        if (!activity.isFinishing() && !activity.isDestroyed()) activity.recreate();
+                    }, 8_000);
+                } catch (Throwable t) {
+                    error("Refresh failed", t);
+                }
+            });
+            bar.getClass().getMethod("setEndView", android.view.View.class).invoke(bar, icon);
+            bar.getClass().getMethod("setSubtitle", CharSequence.class).invoke(bar, info);
+        } catch (Throwable t) {
+            error("Refresh icon unavailable", t);
+        }
+    }
+
+    private static android.view.View find(android.view.View view, String className) {
+        for (Class<?> c = view.getClass(); c != null; c = c.getSuperclass())
+            if (c.getName().equals(className)) return view;
+        if (view instanceof android.view.ViewGroup g)
+            for (int i = 0; i < g.getChildCount(); i++) {
+                android.view.View found = find(g.getChildAt(i), className);
+                if (found != null) return found;
+            }
+        return null;
+    }
+
+    /** A plain circular-arrow refresh glyph in the screen's text color, like Xiaomi's action icons. */
+    private static android.graphics.drawable.Drawable refreshGlyph(Context context) {
+        android.content.res.TypedArray a = context.obtainStyledAttributes(new int[]{android.R.attr.textColorPrimary});
+        int color = a.getColor(0, 0xFF000000);
+        a.recycle();
+        int px = Math.round(26 * context.getResources().getDisplayMetrics().density);
         android.graphics.Bitmap b = android.graphics.Bitmap.createBitmap(px, px, android.graphics.Bitmap.Config.ARGB_8888);
         android.graphics.Canvas c = new android.graphics.Canvas(b);
-        android.graphics.Paint fill = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-        fill.setColor(0xFF3482FF);
-        float r = px * 0.24f;
-        c.drawRoundRect(0, 0, px, px, r, r, fill);
         android.graphics.Paint stroke = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
-        stroke.setColor(0xFFFFFFFF);
+        stroke.setColor(color);
         stroke.setStyle(android.graphics.Paint.Style.STROKE);
-        stroke.setStrokeWidth(px * 0.085f);
+        stroke.setStrokeWidth(px * 0.09f);
         stroke.setStrokeCap(android.graphics.Paint.Cap.ROUND);
-        float inset = px * 0.27f;
+        float inset = px * 0.16f;
         android.graphics.RectF arc = new android.graphics.RectF(inset, inset, px - inset, px - inset);
         c.drawArc(arc, -60, 300, false, stroke);
-        // Arrow head at the arc's open end.
         double end = Math.toRadians(-60);
         float cx = arc.centerX() + (float) (Math.cos(end) * arc.width() / 2), cy = arc.centerY() + (float) (Math.sin(end) * arc.height() / 2);
         android.graphics.Path head = new android.graphics.Path();
-        float h = px * 0.14f;
+        float h = px * 0.17f;
         head.moveTo(cx - h * 0.2f, cy - h);
         head.lineTo(cx + h * 0.9f, cy + h * 0.15f);
         head.lineTo(cx - h * 0.6f, cy + h * 0.55f);
         head.close();
-        fill.setColor(0xFFFFFFFF);
+        android.graphics.Paint fill = new android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG);
+        fill.setColor(color);
         c.drawPath(head, fill);
         b.setDensity(context.getResources().getDisplayMetrics().densityDpi);
         return new android.graphics.drawable.BitmapDrawable(context.getResources(), b);

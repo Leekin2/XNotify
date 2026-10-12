@@ -16,7 +16,7 @@ XNotify removes all three.
 ## Features
 - ✅ **Every app:** Telegram, WhatsApp, Instagram, SMS, calls and anything else installed on the phone.
 - ✅ **Receive tab unlocked:** Settings → Interconnectivity → Notifications now shows the **Receive** tab on the tablet.
-- ✅ **App picker with icons:** The phone sends its app list and icons to the tablet. After installing new apps, tap **Refresh from phone**.
+- ✅ **App picker with icons:** The phone sends its app list and icons to the tablet. After installing new apps, tap the refresh icon at the top right.
 - ✅ **Clear notifications:** Big app icon; the title shows the source device and the app name.
 - ✅ **Pop-ups:** Notifications pop up on the tablet screen, even while you watch a video.
 - ✅ **Works while you use the phone**, not only when it is locked.
@@ -69,7 +69,7 @@ XNotify bu üç sınırı da kaldırır.
 ### Özellikler
 - ✅ **Tüm uygulamalar:** Telegram, WhatsApp, Instagram, SMS, aramalar ve telefonda kurulu diğer her şey.
 - ✅ **Al sekmesi açılır:** Tablette Ayarlar → Bağlantı → Bildirimler bölümünde artık **Al** sekmesi görünür.
-- ✅ **İkonlu uygulama seçici:** Telefon, uygulama listesini ve ikonlarını tablete gönderir. Telefona yeni uygulama kurduktan sonra **Telefondan yenile**'ye dokunun.
+- ✅ **İkonlu uygulama seçici:** Telefon, uygulama listesini ve ikonlarını tablete gönderir. Telefona yeni uygulama kurduktan sonra sağ üstteki yenile simgesine dokunun.
 - ✅ **Anlaşılır bildirimler:** Büyük uygulama ikonu; başlıkta bildirimin geldiği cihaz ve uygulama adı yazar.
 - ✅ **Ekranda açılır:** Bildirimler tablette ekranın üstünde açılır, video izlerken bile.
 - ✅ **Telefonu kullanırken de çalışır**, sadece kilitliyken değil.

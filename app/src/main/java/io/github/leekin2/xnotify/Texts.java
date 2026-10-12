@@ -30,27 +30,27 @@ final class Texts {
                 return new Texts("Telefondan yenile", "%1$d uygulama · son güncelleme %2$s", "Telefondan isteniyor…",
                         "Bu cihazda da kurulu: bildirimler iki kez gelebilir", "henüz yok",
                         "Telefonun uygulama listesi henüz gelmedi",
-                        "\"Telefondan yenile\"ye dokunun ya da bu ekrana birazdan tekrar girin.");
+                        "Sağ üstteki yenile simgesine dokunun ya da bu ekrana birazdan tekrar girin.");
             case "ru":
                 return new Texts("Обновить с телефона", "Приложений: %1$d · обновлено %2$s", "Запрос к телефону…",
                         "Установлено и здесь: уведомления могут дублироваться", "ещё нет",
                         "Список приложений телефона ещё не получен",
-                        "Нажмите «Обновить с телефона» или откройте этот экран чуть позже.");
+                        "Нажмите значок обновления вверху справа или откройте этот экран чуть позже.");
             case "es":
                 return new Texts("Actualizar desde el teléfono", "%1$d apps · actualizado %2$s", "Solicitando al teléfono…",
                         "También instalada aquí: las notificaciones pueden duplicarse", "nunca",
                         "La lista de apps del teléfono aún no ha llegado",
-                        "Toca «Actualizar desde el teléfono» o vuelve a abrir esta pantalla en un momento.");
+                        "Toca el icono de actualizar arriba a la derecha o vuelve a abrir esta pantalla en un momento.");
             case "zh":
                 return new Texts("从手机刷新", "%1$d 个应用 · 更新于 %2$s", "正在向手机请求…",
                         "此设备也已安装：通知可能重复", "暂无",
                         "尚未收到手机的应用列表",
-                        "点按“从手机刷新”，或稍后重新打开此页面。");
+                        "点按右上角的刷新图标，或稍后重新打开此页面。");
             default:
                 return new Texts("Refresh from phone", "%1$d apps · last updated %2$s", "Requesting from phone…",
                         "Also installed here: notifications may appear twice", "never",
                         "The phone's app list hasn't arrived yet",
-                        "Tap \"Refresh from phone\" or reopen this screen in a moment.");
+                        "Tap the refresh icon at the top right or reopen this screen in a moment.");
         }
     }
 }

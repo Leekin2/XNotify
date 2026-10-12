@@ -9,8 +9,8 @@ android {
         applicationId 'io.github.leekin2.xnotify'
         minSdk 35
         targetSdk 36
-        versionCode 26
-        versionName '3.4'
+        versionCode 27
+        versionName '3.5'
     }
     buildTypes {
         release { signingConfig signingConfigs.debug; minifyEnabled true; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' }
