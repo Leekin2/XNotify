@@ -57,13 +57,27 @@ public final class XNotifyModule extends XposedModule {
     /** Skip forwarded copies of apps that are installed on the tablet too. */
     private boolean dedupe() { return true; }
 
+    /** Switches from the settings screen; read when a process starts, so they apply after a restart. */
+    private boolean setting(String key) {
+        try {
+            return getRemotePreferences(SettingsActivity.GROUP).getBoolean(key, true);
+        } catch (Throwable t) {
+            return true;
+        }
+    }
+
     @Override
     public void onPackageReady(XposedModuleInterface.PackageReadyParam param) {
         if (SYSTEMUI.equals(param.getPackageName())) {
-            try { hookHeadsUp(param.getClassLoader()); } catch (Throwable t) { error("Pop-up hook unavailable", t); }
+            if (setting(SettingsActivity.FORWARD)) {
+                try { hookHeadsUp(param.getClassLoader()); } catch (Throwable t) { error("Pop-up hook unavailable", t); }
+            }
+            if (!setting(SettingsActivity.REPLY)) info("Reply box: switched off in settings");
+            else if (xreplyInstalled()) info("Reply box: left to the XReply module, which is still installed");
+            else new ReplyHooks(this).install(param.getClassLoader());
             return;
         }
-        if (!MILINK.equals(param.getPackageName())) return;
+        if (!MILINK.equals(param.getPackageName()) || !setting(SettingsActivity.FORWARD)) return;
         ClassLoader loader = param.getClassLoader();
         try { hookSender(loader); } catch (Throwable t) { error("Sender hook unavailable", t); }
         try { hookReceiver(loader); } catch (Throwable t) { error("Receiver hook unavailable", t); }
@@ -72,6 +86,18 @@ public final class XNotifyModule extends XposedModule {
         try { hookAppPicker(loader); } catch (Throwable t) { error("App picker hook unavailable", t); }
         try { hookCatalogRequest(loader); } catch (Throwable t) { error("App list request hook unavailable", t); }
         if ("com.milink.crossdeviceservice".equals(android.app.Application.getProcessName())) sendCatalogSoon(loader);
+    }
+
+    /** Both modules hooking the reply box would apply every change twice. */
+    private static boolean xreplyInstalled() {
+        // System UI's Application may not exist yet; ask the package manager service directly.
+        try {
+            Object pm = Class.forName("android.app.ActivityThread").getMethod("getPackageManager").invoke(null);
+            Method get = pm.getClass().getMethod("getApplicationInfo", String.class, long.class, int.class);
+            return get.invoke(pm, ReplyHooks.XREPLY, 0L, android.os.Process.myUid() / 100_000) != null;
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
     // --- Tablet pop-ups ------------------------------------------------------------------------

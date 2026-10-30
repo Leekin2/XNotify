@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">XNotify</string>
-    <string name="module_description">HyperOS: shows phone notifications on your Xiaomi tablet, for every app. Enable on both devices; pick the apps on the tablet under Settings → Interconnectivity → Notifications → your phone.</string>
+    <string name="module_description">HyperOS: shows phone notifications on your Xiaomi tablet, for every app. Enable on both devices; pick the apps on the tablet under Settings → Interconnectivity → Notifications → your phone. Also gives Telegram, WhatsApp and every other notification Xiaomi\'s reply box and buttons (formerly XReply).</string>
+    <string name="settings_forward">Phone notifications on the tablet</string>
+    <string name="settings_forward_summary">Forward every app\'s notifications between Xiaomi devices (Interconnectivity) and let them pop up on the tablet.</string>
+    <string name="settings_reply">Xiaomi reply box</string>
+    <string name="settings_reply_summary">Xiaomi\'s reply box and buttons for Telegram, WhatsApp and every other notification (formerly XReply). Uninstall XReply if it is still installed.</string>
+    <string name="settings_restart">Changes apply after a reboot (or after restarting System UI and Interconnectivity).</string>
+    <string name="settings_no_service">LSPosed is not connected: enable XNotify in LSPosed and open this screen from there.</string>
 </resources>

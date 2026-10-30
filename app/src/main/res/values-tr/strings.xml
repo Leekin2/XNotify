@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="settings_forward">Telefon bildirimleri tablette</string>
+    <string name="settings_forward_summary">Her uygulamanın bildirimini Xiaomi cihazlar arasında aktarır (Cihazlar arası bağlantı) ve tablette açılır pencere olarak gösterir.</string>
+    <string name="settings_reply">Xiaomi yanıt kutusu</string>
+    <string name="settings_reply_summary">Telegram, WhatsApp ve diğer tüm bildirimlerde Xiaomi\'nin yanıt kutusu ve butonları (eski XReply). XReply hâlâ yüklüyse kaldırın.</string>
+    <string name="settings_restart">Değişiklikler yeniden başlatmadan sonra geçerli olur (veya System UI ve Cihazlar arası bağlantı yeniden başlatılınca).</string>
+    <string name="settings_no_service">LSPosed bağlı değil: XNotify\'ı LSPosed\'da etkinleştirip bu ekranı oradan açın.</string>
 </resources>
