@@ -1,5 +1,13 @@
 # XNotify
 
+> [!IMPORTANT]
+> **XNotify has moved to [XApps](https://github.com/Leekin2/XApps).** XGoogle, XSecurity and XNotify are now one app and one root module.
+> Download **XApps** from its [latest release](https://github.com/Leekin2/XApps/releases/latest). Flashing the XApps zip moves your XNotify settings over and removes XNotify by itself.
+> This repository stays for history; new versions are released only in XApps.
+>
+> **XNotify artık [XApps](https://github.com/Leekin2/XApps) içinde.** Yeni sürümler yalnızca XApps olarak yayınlanıyor; XApps zip'i ayarlarınızı taşır ve XNotify'i kendisi kaldırır.
+
+
 **See your Xiaomi phone's notifications on your Xiaomi tablet, from every app, and reply to them with Xiaomi's own reply box.**
 An LSPosed module for the HyperOS 4 China ROM.
 
